@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
+import api from '@/lib/api';
 import Link from 'next/link';
 
 export default function AuthPage() {
@@ -10,6 +11,11 @@ export default function AuthPage() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
+  const [codeSent, setCodeSent] = useState(false);
+  const [codeVerified, setCodeVerified] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -20,6 +26,44 @@ export default function AuthPage() {
     router.push('/');
     return null;
   }
+
+  const handleSendCode = async () => {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError('请输入有效的邮箱地址');
+      return;
+    }
+    setError('');
+    setSendingCode(true);
+    try {
+      await api.verify.sendCode(email);
+      setCodeSent(true);
+      setCountdown(60);
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) { clearInterval(timer); return 0; }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (err: any) {
+      setError(err.message || '发送失败');
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (!code || code.length !== 6) {
+      setError('请输入6位验证码');
+      return;
+    }
+    setError('');
+    try {
+      await api.verify.checkCode(email, code);
+      setCodeVerified(true);
+    } catch (err: any) {
+      setError(err.message || '验证失败');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,6 +79,11 @@ export default function AuthPage() {
           setSubmitting(false);
           return;
         }
+        if (!codeVerified) {
+          setError('请先验证邮箱');
+          setSubmitting(false);
+          return;
+        }
         await register(username, email, password);
       }
       router.push('/');
@@ -45,12 +94,20 @@ export default function AuthPage() {
     }
   };
 
+  const switchTab = (t: 'login' | 'register') => {
+    setTab(t);
+    setError('');
+    setCodeSent(false);
+    setCodeVerified(false);
+    setCode('');
+  };
+
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4 py-16">
       <div className="w-full max-w-md">
         <div className="flex mb-8 bg-dark-900 rounded-lg p-1">
           <button
-            onClick={() => { setTab('login'); setError(''); }}
+            onClick={() => switchTab('login')}
             className={`flex-1 py-2 text-sm rounded transition-colors ${
               tab === 'login' ? 'bg-primary text-dark-800 font-semibold' : 'text-gray-400'
             }`}
@@ -58,7 +115,7 @@ export default function AuthPage() {
             登录
           </button>
           <button
-            onClick={() => { setTab('register'); setError(''); }}
+            onClick={() => switchTab('register')}
             className={`flex-1 py-2 text-sm rounded transition-colors ${
               tab === 'register' ? 'bg-primary text-dark-800 font-semibold' : 'text-gray-400'
             }`}
@@ -92,15 +149,57 @@ export default function AuthPage() {
 
           <div>
             <label className="block text-sm text-gray-300 mb-1">邮箱</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="input-field"
-              placeholder="your@email.com"
-              required
-            />
+            <div className="flex gap-2">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setCodeVerified(false); }}
+                className="input-field flex-1"
+                placeholder="your@email.com"
+                required
+              />
+              {tab === 'register' && (
+                <button
+                  type="button"
+                  onClick={handleSendCode}
+                  disabled={sendingCode || countdown > 0 || codeVerified}
+                  className="btn-outline text-xs !px-3 !py-0 whitespace-nowrap disabled:opacity-50"
+                >
+                  {codeVerified ? '已验证' : sendingCode ? '发送中' : countdown > 0 ? `${countdown}s` : '获取验证码'}
+                </button>
+              )}
+            </div>
           </div>
+
+          {tab === 'register' && codeSent && !codeVerified && (
+            <div>
+              <label className="block text-sm text-gray-300 mb-1">验证码</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  className="input-field flex-1"
+                  placeholder="输入6位验证码"
+                  maxLength={6}
+                  inputMode="numeric"
+                />
+                <button
+                  type="button"
+                  onClick={handleVerifyCode}
+                  className="btn-outline text-xs !px-3 !py-0 whitespace-nowrap"
+                >
+                  验证
+                </button>
+              </div>
+            </div>
+          )}
+
+          {tab === 'register' && codeVerified && (
+            <div className="bg-green-900/30 border border-green-700 text-green-300 px-4 py-2 rounded text-xs">
+              ✅ 邮箱已验证成功
+            </div>
+          )}
 
           <div>
             <label className="block text-sm text-gray-300 mb-1">密码</label>

@@ -87,6 +87,14 @@ export const api = {
   revenue: {
     list: () => request<any[]>('/api/revenue'),
   },
+
+  verify: {
+    sendCode: (email: string) =>
+      request<any>('/api/verify/send-code', { method: 'POST', body: JSON.stringify({ email }) }),
+
+    checkCode: (email: string, code: string) =>
+      request<any>('/api/verify/check-code', { method: 'POST', body: JSON.stringify({ email, code }) }),
+  },
 };
 
 export { ApiError };

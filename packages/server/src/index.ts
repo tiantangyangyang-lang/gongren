@@ -23,6 +23,7 @@ import worksRoutes from './routes/works.js';
 import uploadRoutes from './routes/upload.js';
 import usersRoutes from './routes/users.js';
 import revenueRoutes from './routes/revenue.js';
+import verifyRoutes from './routes/verify.js';
 
 const app = new Hono();
 
@@ -44,6 +45,7 @@ app.route('/api/works', worksRoutes);
 app.route('/api/upload', uploadRoutes);
 app.route('/api/users', usersRoutes);
 app.route('/api/revenue', revenueRoutes);
+app.route('/api/verify', verifyRoutes);
 
 // Health check
 app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));

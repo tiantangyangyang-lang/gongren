@@ -6,7 +6,7 @@ import type { JwtPayload } from '../auth.js';
 
 const auth = new Hono();
 
-// POST /api/auth/register
+// POST /api/auth/register (requires email verification)
 auth.post('/register', async (c) => {
   try {
     const body = await c.req.json();
@@ -16,6 +16,17 @@ auth.post('/register', async (c) => {
     }
 
     const { username, email, password } = parsed.data;
+
+    // Verify that email was verified (check for a used code in last 15 min)
+    const [verified] = await pool.query(
+      `SELECT id FROM verification_codes
+       WHERE email = ? AND used = TRUE AND created_at > DATE_SUB(NOW(), INTERVAL 15 MINUTE)
+       LIMIT 1`,
+      [email]
+    ) as any;
+    if (verified.length === 0) {
+      return c.json({ error: '请先验证邮箱', code: 'EMAIL_NOT_VERIFIED' }, 400);
+    }
 
     // Check existing user
     const [existing] = await pool.query(

@@ -57,6 +57,17 @@ CREATE TABLE IF NOT EXISTS revenue_records (
   FOREIGN KEY (work_id)    REFERENCES works(id) ON DELETE CASCADE,
   FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS verification_codes (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  email       VARCHAR(255) NOT NULL,
+  code        VARCHAR(6)   NOT NULL,
+  expires_at  TIMESTAMP    NOT NULL,
+  used        BOOLEAN      DEFAULT FALSE,
+  created_at  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_email_code (email, code),
+  INDEX idx_expires (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 `;
 
 async function initDB() {
