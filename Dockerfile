@@ -12,7 +12,7 @@ FROM node:22-alpine
 WORKDIR /app
 
 # Copy built frontend
-COPY --from=web-builder /app/packages/web/out ./public
+COPY --from=web-builder /app/packages/web/out ./packages/server/public
 
 # Copy server source
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json tsconfig.base.json ./
