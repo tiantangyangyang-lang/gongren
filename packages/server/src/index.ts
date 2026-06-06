@@ -39,6 +39,14 @@ app.use('*', cors({
 // Static file serving for uploads
 app.use('/uploads/*', serveStatic({ root: uploadsDir }));
 
+// Serve frontend static files (in Docker, built to /app/public)
+const publicDir = join(__dirname, '../../public');
+if (existsSync(publicDir)) {
+  app.use('/*', serveStatic({ root: publicDir }));
+  // SPA fallback: serve index.html for all non-API routes
+  app.get('/*', serveStatic({ path: 'index.html', root: publicDir }));
+}
+
 // API routes
 app.route('/api/auth', authRoutes);
 app.route('/api/works', worksRoutes);
