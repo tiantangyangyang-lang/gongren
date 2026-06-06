@@ -1,0 +1,15 @@
+{
+  "name": "angang",
+  "version": "0.1.0",
+  "private": true,
+  "description": "鞍钢 - 共享世界集体创作平台",
+  "scripts": {
+    "dev": "pnpm --parallel -r dev",
+    "dev:web": "pnpm --filter @angang/web dev",
+    "dev:server": "pnpm --filter @angang/server dev",
+    "build": "pnpm -r build",
+    "build:web": "pnpm --filter @angang/web build",
+    "build:server": "pnpm --filter @angang/server build",
+    "lint": "pnpm -r lint"
+  }
+}
