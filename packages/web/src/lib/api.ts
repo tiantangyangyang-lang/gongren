@@ -1,4 +1,5 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+// Use empty string = same origin. Works for both dev (next dev proxies /api) and production (server serves both frontend + API)
+const API_BASE = '';
 
 class ApiError extends Error {
   status: number;
