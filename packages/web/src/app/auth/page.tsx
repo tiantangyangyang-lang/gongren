@@ -30,13 +30,21 @@ export default function AuthPage() {
       await api.verify.sendCode(email);
       setCodeSent(true); setCountdown(60);
       const timer = setInterval(() => { setCountdown((prev) => { if (prev <= 1) { clearInterval(timer); return 0; } return prev - 1; }); }, 1000);
-    } catch (err: any) { setError(err.message || '发送失败'); } finally { setSendingCode(false); }
+    } catch (err: any) {
+      setError(err.message || '验证码发送失败，请稍后重试');
+    } finally { setSendingCode(false); }
   };
 
   const handleVerifyCode = async () => {
     if (!code || code.length !== 6) { setError('请输入6位验证码'); return; }
     setError('');
-    try { await api.verify.checkCode(email, code); setCodeVerified(true); } catch (err: any) { setError(err.message || '验证失败'); }
+    try {
+      await api.verify.checkCode(email, code);
+      setCodeVerified(true); setError('');
+    } catch (err: any) {
+      setError(err.message || '验证码无效或已过期');
+      setCode('');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,7 +53,7 @@ export default function AuthPage() {
       if (tab === 'login') { await login(email, password); }
       else {
         if (!username.trim()) { setError('请输入用户名'); setSubmitting(false); return; }
-        if (!codeVerified) { setError('请先验证邮箱'); setSubmitting(false); return; }
+        // Backend will reject if email not verified (when SKIP_EMAIL_VERIFY != true)
         await register(username, email, password);
       }
       router.push('/');
@@ -81,12 +89,14 @@ export default function AuthPage() {
             </div>
           </div>
 
-          {tab === 'register' && codeSent && !codeVerified && (
-            <div><label className="block text-sm text-red-200/80 mb-1">验证码</label>
+          {tab === 'register' && !codeVerified && (
+            <div>
+              <label className="block text-sm text-red-200/80 mb-1">验证码 {codeSent && <span className="text-gold text-xs">(已发送到邮箱)</span>}</label>
               <div className="flex gap-2">
                 <input type="text" value={code} onChange={(e) => setCode(e.target.value)} className="input-field flex-1" placeholder="输入6位验证码" maxLength={6} inputMode="numeric" />
                 <button type="button" onClick={handleVerifyCode} className="btn-outline text-xs !px-3 !py-0 whitespace-nowrap">验证</button>
-              </div></div>
+              </div>
+            </div>
           )}
 
           {tab === 'register' && codeVerified && (
