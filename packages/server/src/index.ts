@@ -9,8 +9,8 @@ import { existsSync, mkdirSync, readFileSync } from 'fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// Load .env
-config({ path: resolve(__dirname, '../../../.env') });
+// Load .env (silently skip if missing — Docker uses platform env vars)
+config({ path: resolve(__dirname, '../../../.env'), override: false });
 
 // Ensure uploads directory
 const uploadsDir = join(__dirname, '../uploads');
@@ -27,9 +27,14 @@ import verifyRoutes from './routes/verify.js';
 
 const app = new Hono();
 
-// CORS — allow frontend origin
+// CORS — allow frontend and production domain
+const ALLOWED_ORIGINS = [
+  'http://localhost:3000', 'http://127.0.0.1:3000',
+  'http://localhost:3001', 'http://127.0.0.1:3001',
+  'https://gongren.xyz', 'https://www.gongren.xyz',
+];
 app.use('*', cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: (origin) => (origin && ALLOWED_ORIGINS.includes(origin)) || !origin ? origin || '*' : null,
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
   exposeHeaders: ['Content-Type'],
@@ -80,7 +85,7 @@ if (existsSync(publicDir)) {
   });
 }
 
-const port = Number(process.env.SERVER_PORT) || 3001;
+const port = Number(process.env.PORT || process.env.SERVER_PORT) || 3001;
 
 console.log(`鞍钢 Server starting on http://localhost:${port}`);
 

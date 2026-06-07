@@ -21,7 +21,11 @@ COPY packages/server ./packages/server
 
 RUN corepack enable && pnpm install --frozen-lockfile
 
-ENV SERVER_PORT=3001
+ENV PORT=3001
 EXPOSE 3001
 
-CMD ["pnpm", "--filter", "@angang/server", "dev"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- http://localhost:3001/api/health || exit 1
+
+CMD ["pnpm", "--filter", "@angang/server", "exec", "tsx", "src/index.ts"]
