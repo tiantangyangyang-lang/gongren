@@ -36,7 +36,7 @@ export default function ExplorePage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="text-center mb-12">
         <h1 className="text-3xl font-bold text-gray-100 mb-2">探索创作</h1>
-        <div className="gold-line my-4"></div>
+        <div className="red-line my-4"></div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3 mb-8">

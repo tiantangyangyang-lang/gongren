@@ -6,16 +6,17 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#c9a84c',
-          dark: '#a8882c',
-          light: '#d4b96e',
+          DEFAULT: '#e63946',
+          dark: '#c1121f',
+          light: '#ff6b6b',
         },
         dark: {
-          900: '#0d0d1a',
-          800: '#1a1a2e',
-          700: '#16213e',
-          600: '#1e2d4a',
-          500: '#2a3a5c',
+          950: '#0a0a0f',
+          900: '#111118',
+          800: '#1a1a24',
+          700: '#222230',
+          600: '#2a2a3a',
+          500: '#333348',
         },
       },
       fontFamily: {

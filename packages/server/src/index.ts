@@ -50,12 +50,25 @@ app.route('/api/verify', verifyRoutes);
 // Health check
 app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
-// Serve frontend static files AFTER API routes (only if public dir exists)
+// Serve frontend static files AFTER API routes
 const publicDir = join(__dirname, '../public');
 if (existsSync(publicDir)) {
+  // Static assets (JS, CSS, images)
   app.get('/_next/*', serveStatic({ root: publicDir }));
   app.get('/favicon.ico', serveStatic({ root: publicDir }));
-  app.get('/*', serveStatic({ path: 'index.html', root: publicDir }));
+  // Page routes — serveStatic resolves /auth/ → auth/index.html etc.
+  app.get('/auth', serveStatic({ root: publicDir }));
+  app.get('/auth/*', serveStatic({ root: publicDir }));
+  app.get('/explore', serveStatic({ root: publicDir }));
+  app.get('/explore/*', serveStatic({ root: publicDir }));
+  app.get('/upload', serveStatic({ root: publicDir }));
+  app.get('/upload/*', serveStatic({ root: publicDir }));
+  app.get('/work', serveStatic({ root: publicDir }));
+  app.get('/work/*', serveStatic({ root: publicDir }));
+  app.get('/user', serveStatic({ root: publicDir }));
+  app.get('/user/*', serveStatic({ root: publicDir }));
+  app.get('/', serveStatic({ root: publicDir }));
+  app.get('/*', serveStatic({ root: publicDir }));
 }
 
 const port = Number(process.env.SERVER_PORT) || 3001;

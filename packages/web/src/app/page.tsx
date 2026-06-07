@@ -23,7 +23,7 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-12">
           <h2 className="section-title">热门创作</h2>
-          <div className="gold-line my-4"></div>
+          <div className="red-line my-4"></div>
           <p className="section-subtitle">发现来自人民创造者的精彩作品</p>
         </div>
 
@@ -56,7 +56,7 @@ export default function HomePage() {
       <section className="bg-dark-900 py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="section-title mb-4">集体所有制创作平台</h2>
-          <div className="gold-line my-4"></div>
+          <div className="red-line my-4"></div>
           <p className="text-gray-400 text-sm leading-relaxed max-w-2xl mx-auto">
             创作者上传作品后，在12个月内获得全部收益。之后该作品进入共享池，所有人可以按成本价获取。
             我们不支持知识产权永久垄断——创造属于人民，最终实现按需分配。
