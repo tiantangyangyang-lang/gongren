@@ -5,7 +5,7 @@ import { serve } from '@hono/node-server';
 import { config } from 'dotenv';
 import { resolve, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync } from 'fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -53,22 +53,31 @@ app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISO
 // Serve frontend static files AFTER API routes
 const publicDir = join(__dirname, '../public');
 if (existsSync(publicDir)) {
-  // Static assets (JS, CSS, images)
+  // Static assets
   app.get('/_next/*', serveStatic({ root: publicDir }));
   app.get('/favicon.ico', serveStatic({ root: publicDir }));
-  // Page routes — serveStatic resolves /auth/ → auth/index.html etc.
-  app.get('/auth', serveStatic({ root: publicDir }));
-  app.get('/auth/*', serveStatic({ root: publicDir }));
-  app.get('/explore', serveStatic({ root: publicDir }));
-  app.get('/explore/*', serveStatic({ root: publicDir }));
-  app.get('/upload', serveStatic({ root: publicDir }));
-  app.get('/upload/*', serveStatic({ root: publicDir }));
-  app.get('/work', serveStatic({ root: publicDir }));
-  app.get('/work/*', serveStatic({ root: publicDir }));
-  app.get('/user', serveStatic({ root: publicDir }));
-  app.get('/user/*', serveStatic({ root: publicDir }));
-  app.get('/', serveStatic({ root: publicDir }));
-  app.get('/*', serveStatic({ root: publicDir }));
+
+  // Custom handler: map request path to index.html in subdirectories
+  app.get('/*', (c) => {
+    let filePath = c.req.path.slice(1); // remove leading /
+    if (!filePath || filePath.endsWith('/')) {
+      filePath = filePath + 'index.html';
+    }
+    const fullPath = join(publicDir, filePath);
+    if (existsSync(fullPath)) {
+      const ext = filePath.split('.').pop()?.toLowerCase();
+      const mimeMap: Record<string, string> = {
+        html: 'text/html', css: 'text/css', js: 'application/javascript',
+        json: 'application/json', png: 'image/png', jpg: 'image/jpeg',
+        jpeg: 'image/jpeg', svg: 'image/svg+xml', ico: 'image/x-icon',
+        txt: 'text/plain',
+      };
+      const mime = mimeMap[ext || ''] || 'application/octet-stream';
+      return c.body(readFileSync(fullPath), 200, { 'Content-Type': mime });
+    }
+    // SPA fallback: serve root index.html for client-side routes
+    return c.body(readFileSync(join(publicDir, 'index.html')), 200, { 'Content-Type': 'text/html' });
+  });
 }
 
 const port = Number(process.env.SERVER_PORT) || 3001;
