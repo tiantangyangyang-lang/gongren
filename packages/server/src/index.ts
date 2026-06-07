@@ -39,14 +39,6 @@ app.use('*', cors({
 // Static file serving for uploads
 app.use('/uploads/*', serveStatic({ root: uploadsDir }));
 
-// Serve frontend static files (in Docker, built to /app/public)
-const publicDir = join(__dirname, '../public');
-if (existsSync(publicDir)) {
-  app.use('/*', serveStatic({ root: publicDir }));
-  // SPA fallback: serve index.html for all non-API routes
-  app.get('/*', serveStatic({ path: 'index.html', root: publicDir }));
-}
-
 // API routes
 app.route('/api/auth', authRoutes);
 app.route('/api/works', worksRoutes);
@@ -57,6 +49,14 @@ app.route('/api/verify', verifyRoutes);
 
 // Health check
 app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));
+
+// Serve frontend static files AFTER API routes (only if public dir exists)
+const publicDir = join(__dirname, '../public');
+if (existsSync(publicDir)) {
+  app.get('/_next/*', serveStatic({ root: publicDir }));
+  app.get('/favicon.ico', serveStatic({ root: publicDir }));
+  app.get('/*', serveStatic({ path: 'index.html', root: publicDir }));
+}
 
 const port = Number(process.env.SERVER_PORT) || 3001;
 
