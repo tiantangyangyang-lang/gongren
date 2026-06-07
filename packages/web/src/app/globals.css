@@ -3,57 +3,51 @@
 @tailwind utilities;
 
 @layer base {
-  * {
-    box-sizing: border-box;
-  }
-
+  * { box-sizing: border-box; }
   body {
-    @apply bg-dark-800 text-gray-100 font-sans;
-    margin: 0;
-    min-height: 100vh;
+    margin: 0; min-height: 100vh;
+    background: linear-gradient(180deg, #3d0000 0%, #6d0008 30%, #5a0006 60%, #3d0000 100%);
+    background-attachment: fixed;
+    color: #fff; font-family: system-ui, -apple-system, sans-serif;
   }
-
-  ::selection {
-    background-color: #e63946;
-    color: #fff;
-  }
+  ::selection { background: #ffd700; color: #6d0008; }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #3d0000; }
+  ::-webkit-scrollbar-thumb { background: #e63946; border-radius: 4px; }
 }
 
 @layer components {
   .btn-primary {
-    @apply px-6 py-2.5 bg-primary text-white font-semibold rounded
-           hover:bg-primary-dark transition-all duration-200
+    @apply px-6 py-3 bg-primary text-white font-bold rounded-lg
+           hover:bg-red-600 transition-all duration-300
            disabled:opacity-50 disabled:cursor-not-allowed
-           shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30;
+           shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/50
+           hover:-translate-y-0.5 active:translate-y-0;
   }
-
   .btn-outline {
-    @apply px-6 py-2.5 border border-primary text-primary rounded
-           hover:bg-primary hover:text-white transition-all duration-200;
+    @apply px-6 py-2.5 border-2 border-gold text-gold rounded-lg font-semibold
+           hover:bg-gold hover:text-red-900 transition-all duration-300
+           hover:-translate-y-0.5;
   }
-
+  .btn-gold {
+    @apply px-8 py-3 bg-gold text-red-900 font-bold rounded-lg
+           hover:bg-gold-light transition-all duration-300
+           shadow-xl shadow-gold/30 hover:shadow-2xl hover:shadow-gold/50
+           hover:-translate-y-1 active:translate-y-0;
+  }
   .input-field {
-    @apply w-full px-4 py-2.5 bg-dark-900 border border-dark-500 rounded
-           text-gray-100 placeholder-gray-500
-           focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50
+    @apply w-full px-4 py-3 bg-red-950/50 border border-red-400/20 rounded-lg
+           text-white placeholder-red-200/50
+           focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/30
            transition-all duration-200;
   }
-
   .card {
-    @apply bg-dark-900 border border-dark-600 rounded-lg overflow-hidden
-           hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5
-           transition-all duration-300;
+    @apply bg-red-950/40 backdrop-blur border border-red-400/20 rounded-xl overflow-hidden
+           hover:border-gold/50 hover:shadow-xl hover:shadow-gold/10
+           transition-all duration-500 hover:-translate-y-1;
   }
-
-  .section-title {
-    @apply text-2xl font-bold text-gray-100 mb-2;
-  }
-
-  .section-subtitle {
-    @apply text-gray-400 text-sm;
-  }
-
-  .red-line {
-    @apply w-16 h-0.5 bg-primary mx-auto;
-  }
+  .section-title { @apply text-3xl font-black text-white mb-3 tracking-wide; }
+  .section-subtitle { @apply text-red-200/80 text-base; }
+  .gold-line { @apply w-20 h-1 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto; }
+  .red-glass { @apply bg-red-950/30 backdrop-blur-md border border-red-400/20 rounded-2xl; }
 }
