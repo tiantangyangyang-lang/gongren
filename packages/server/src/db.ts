@@ -3,9 +3,10 @@ import { config } from 'dotenv';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-// Load .env from project root
 const __dirname = dirname(fileURLToPath(import.meta.url));
 config({ path: resolve(__dirname, '../../../.env') });
+
+const sslEnabled = process.env.DATABASE_SSL === 'true' || process.env.DATABASE_PORT === '21052';
 
 const pool = mysql.createPool({
   host: process.env.DATABASE_HOST || '127.0.0.1',
@@ -16,6 +17,7 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  ...(sslEnabled ? { ssl: { rejectUnauthorized: false } } : {}),
 });
 
 export default pool;

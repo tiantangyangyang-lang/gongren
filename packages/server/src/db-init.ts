@@ -76,19 +76,22 @@ async function initDB() {
   const user = process.env.DATABASE_USER || 'root';
   const password = process.env.DATABASE_PASSWORD || '';
   const database = process.env.DATABASE_NAME || 'shared_world';
+  const sslEnabled = process.env.DATABASE_SSL === 'true' || port === 21052;
 
-  // First connect without database to create it if needed
-  const conn = await mysql.createConnection({ host, port, user, password });
+  const conn = await mysql.createConnection({
+    host, port, user, password,
+    ...(sslEnabled ? { ssl: { rejectUnauthorized: false } } : {}),
+  });
+
   await conn.query(`CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
   await conn.query(`USE \`${database}\``);
 
-  // Run schema
   const statements = SCHEMA_SQL.split(';').filter(s => s.trim());
   for (const stmt of statements) {
     await conn.query(stmt);
   }
 
-  console.log(`Database "${database}" initialized successfully.`);
+  console.log(`Database "${database}" initialized successfully on ${host}:${port}.`);
   await conn.end();
   process.exit(0);
 }
